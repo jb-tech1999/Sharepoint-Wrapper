@@ -2,9 +2,9 @@ import requests
 import json
 
 
-#sharepoint rest wrapper
+# sharepoint rest wrapper
 class Sharepoint:
-    #constructor
+    # constructor
     def __init__(self, client_id, client_secret, tenant_id, resource, grant_type, tenant):
         self.client_id = client_id
         self.client_secret = client_secret
@@ -13,7 +13,7 @@ class Sharepoint:
         self.grant_type = grant_type
         self.tenant = tenant
 
-    #get token
+    # get token
     def getToken(self):
         data = {
             'grant_type': self.grant_type,
@@ -30,8 +30,9 @@ class Sharepoint:
         json_data = json.loads(r.text)
         token = json_data['access_token']
         self.token = token
-    #get lists
-    def getLists(self,site ,guid, filters):
+    # get lists
+
+    def getLists(self, site, guid, filters):
         headers = {
             'Authorization': f"Bearer {self.token}",
             'Accept': 'application/json;odata=verbose',
@@ -41,5 +42,3 @@ class Sharepoint:
         list_url = f"https://{self.tenant}.sharepoint.com/sites/{site}/_api/web/lists(guid'{guid}')/Items{filters}"
         l = requests.get(list_url, headers=headers)
         return l.text
-    
-
