@@ -46,8 +46,8 @@ class Sharepoint:
         l = requests.get(list_url, headers=self.headers)
         return l.json()['d']['results']
 
-    def GetEntityname(self):
-        entityFullname = f"https://{self.tenant}.sharepoint.com/sites/{self.site}/_api/web/lists(guid'eb5f9aef-7f94-47c5-a6d9-ce6d56d2ce82')/listItemEntityTypeFullName"
+    def GetEntityname(self, guid):
+        entityFullname = f"https://{self.tenant}.sharepoint.com/sites/{self.site}/_api/web/lists(guid'{guid}')/listItemEntityTypeFullName"
         entityResponse = requests.get(entityFullname, headers=self.headers)
         return entityResponse.json()['d']['ListItemEntityTypeFullName']
 
