@@ -57,3 +57,30 @@ class Sharepoint:
         l = requests.post(list_url, headers=self.headers,
                           data=json.dumps(data))
         return l.json()
+
+    def createNewList(self, listName):
+        list_url = f"https://{self.tenant}.sharepoint.com/sites/{self.site}/_api/web/lists"
+        data = {
+            '__metadata': {'type': 'SP.List'},
+            'AllowContentTypes': True,
+            'BaseTemplate': 100,
+            'ContentTypesEnabled': True,
+            'Description': 'My list description',
+            'Title': listName
+        }
+        l = requests.post(list_url, headers=self.headers,
+                          data=json.dumps(data))
+        return l.json()
+
+    def createNewFields(self, fieldname, guid):
+        list_url = f"https://{self.tenant}.sharepoint.com/sites/{self.site}/_api/web/lists(guid'{guid}')/fields"
+        data = {
+            '__metadata': {'type': 'SP.Field'},
+            'FieldTypeKind': 2,
+            'Title': fieldname,
+            'Required': False,
+            'StaticName': fieldname
+        }
+        l = requests.post(list_url, headers=self.headers,
+                          data=json.dumps(data))
+        return l.json()
