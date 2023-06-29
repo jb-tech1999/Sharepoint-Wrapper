@@ -47,11 +47,20 @@ class Sharepoint:
         return l.json()['d']['results']
 
     def GetEntityname(self, listTitle):
+    #def GetEntityname(self):
         entityFullname = f"https://{self.tenant}.sharepoint.com/sites/{self.site}/_api/web/lists/GetByTitle('{listTitle}')/listItemEntityTypeFullName"
+        
         entityResponse = requests.get(entityFullname, headers=self.headers)
         if entityResponse.status_code == 404:
             return {"error": "List not found","Message":"Create list first"}
         return entityResponse.json()['d']['ListItemEntityTypeFullName']
+    
+    def GetListFields(self, listTitle):
+        FieldList = f"https://{self.tenant}.sharepoint.com/sites/{self.site}/_api/web/lists/GetByTitle('{listTitle}')/fields?$filter=Hidden eq false and ReadOnlyField eq false"
+        FieldResponse = requests.get(FieldList, headers=self.headers)
+        return FieldResponse.json()['d']['results']
+
+
 
     def CreateItem(self, listTitle, data):
 
@@ -79,15 +88,19 @@ class Sharepoint:
                           data=json.dumps(data))
         return l.json()
 
-    def createNewFields(self, fieldname, listTitle):
+    def createNewFields(self, fieldnames, listTitle):
         list_url = f"https://{self.tenant}.sharepoint.com/sites/{self.site}/_api/web/lists/GetByTitle('{listTitle}')/fields"
-        data = {
-            '__metadata': {'type': 'SP.Field'},
-            'FieldTypeKind': 2,
-            'Title': fieldname,
-            'Required': False,
-            'StaticName': fieldname
-        }
-        l = requests.post(list_url, headers=self.headers,
-                          data=json.dumps(data))
-        return l.json()
+        for fieldname in fieldnames:
+            try:
+                data = {
+                    '__metadata': {'type': 'SP.Field'},
+                    'FieldTypeKind': 2,
+                    'Title': fieldname,
+                    'Required': False,
+                    'StaticName': fieldname
+                }
+                l = requests.post(list_url, headers=self.headers,
+                                data=json.dumps(data))
+            except:
+                return {"error": "You messed up", "Message": l.json()}
+        #return l.json()
