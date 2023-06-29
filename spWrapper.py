@@ -40,22 +40,28 @@ class Sharepoint:
             'Content-Type': 'application/json;odata=verbose'
         }
 
-    def getLists(self, guid, filters):
+    def getLists(self, listTitle, filters):
 
-        list_url = f"https://{self.tenant}.sharepoint.com/sites/{self.site}/_api/web/lists(guid'{guid}')/Items{filters}"
+        list_url = f"https://{self.tenant}.sharepoint.com/sites/{self.site}/_api/web/lists/GetByTitle('{listTitle}')/Items{filters}"
         l = requests.get(list_url, headers=self.headers)
         return l.json()['d']['results']
 
-    def GetEntityname(self, guid):
-        entityFullname = f"https://{self.tenant}.sharepoint.com/sites/{self.site}/_api/web/lists(guid'{guid}')/listItemEntityTypeFullName"
+    def GetEntityname(self, listTitle):
+        entityFullname = f"https://{self.tenant}.sharepoint.com/sites/{self.site}/_api/web/lists/GetByTitle('{listTitle}')/listItemEntityTypeFullName"
         entityResponse = requests.get(entityFullname, headers=self.headers)
+        if entityResponse.status_code == 404:
+            return {"error": "List not found","Message":"Create list first"}
         return entityResponse.json()['d']['ListItemEntityTypeFullName']
 
-    def CreateItem(self, guid, data):
+    def CreateItem(self, listTitle, data):
 
-        list_url = f"https://{self.tenant}.sharepoint.com/sites/{self.site}/_api/web/lists(guid'{guid}')/Items"
+        list_url = f"https://{self.tenant}.sharepoint.com/sites/{self.site}/_api/web/lists/GetByTitle('{listTitle}')/Items"
+
         l = requests.post(list_url, headers=self.headers,
                           data=json.dumps(data))
+        if l.status_code == 400:
+            return {"error": "You messed up", "Message": l.json()}
+        
         return l.json()
 
     def createNewList(self, listName):
@@ -68,12 +74,13 @@ class Sharepoint:
             'Description': 'My list description',
             'Title': listName
         }
+
         l = requests.post(list_url, headers=self.headers,
                           data=json.dumps(data))
         return l.json()
 
-    def createNewFields(self, fieldname, guid):
-        list_url = f"https://{self.tenant}.sharepoint.com/sites/{self.site}/_api/web/lists(guid'{guid}')/fields"
+    def createNewFields(self, fieldname, listTitle):
+        list_url = f"https://{self.tenant}.sharepoint.com/sites/{self.site}/_api/web/lists/GetByTitle('{listTitle}')/fields"
         data = {
             '__metadata': {'type': 'SP.Field'},
             'FieldTypeKind': 2,
